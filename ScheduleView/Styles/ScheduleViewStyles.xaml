@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ScheduleView.Wpf.Controls">
+
+    <Style x:Key="ScheduleViewDefaultStyle" TargetType="{x:Type controls:ScheduleView}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <controls:MonthsViewAppointmentsPanel x:Name="PART_MonthsViewAppointmentsPanel"></controls:MonthsViewAppointmentsPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <Style  TargetType="{x:Type controls:ScheduleView}" BasedOn="{StaticResource ScheduleViewDefaultStyle}" />
+</ResourceDictionary>
