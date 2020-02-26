@@ -5,6 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controls="clr-namespace:ScheduleView.Wpf.Controls"
         mc:Ignorable="d"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <controls:ScheduleView></controls:ScheduleView>
