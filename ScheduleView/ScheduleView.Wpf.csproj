@@ -55,10 +55,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Controls\DrawingUtils.cs" />
+    <Compile Include="Controls\AppointmentItem.cs" />
+    <Compile Include="Controls\DrawingContextExtensions.cs" />
     <Compile Include="Controls\LayoutHelper.cs" />
-    <Compile Include="Controls\DrawingData.cs" />
     <Compile Include="Controls\MonthsViewAppointmentsPanel.cs" />
+    <Compile Include="Controls\MonthViewData.cs" />
+    <Compile Include="Controls\MonthViewGrid.cs" />
     <Compile Include="Controls\ScheduleView.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

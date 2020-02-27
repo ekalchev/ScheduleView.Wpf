@@ -11,30 +11,56 @@ namespace ScheduleView.Wpf.Controls
 {
     public class MonthsViewAppointmentsPanel : Panel
     {
-        protected override Size MeasureOverride(Size availableSize)
+        private List<AppointmentItem> appointmentItems = new List<AppointmentItem>();
+        internal ScheduleView ScheduleView { get; set; }
+
+        private MonthViewData Data => ScheduleView.MonthsViewData;
+
+        public MonthsViewAppointmentsPanel()
         {
-            return base.MeasureOverride(availableSize);
+            for (int i = 0; i < 500; i++)
+            {
+                var appointmentItem = new AppointmentItem();
+                appointmentItems.Add(appointmentItem);
+                Children.Add(appointmentItem);
+            }
         }
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            return base.ArrangeOverride(finalSize);
-        }
+            var rowsCount = Data.RowsCount;
+            var columnsCount = Data.ColumnsCount;
+            int currentAppointmentItemIndex = 0;
 
-        private Line CreateLine(Point a, Point b)
-        {
-            Line line = new Line();
-            Thickness thickness = new Thickness(1);
-            line.Margin = thickness;
-            line.Visibility = System.Windows.Visibility.Visible;
-            line.StrokeThickness = 4;
-            line.Stroke = System.Windows.Media.Brushes.Black;
-            line.X1 = a.X;
-            line.Y1 = a.Y;
-            line.X2 = b.X;
-            line.Y2 = b.Y;
+            List<UIElement> appointmentItemsInUse = new List<UIElement>();
 
-            return line;
+            for (int row = 0; row < rowsCount; row++)
+            {
+                for (int column = 0; column < columnsCount; column++)
+                {
+                    Rect arrangeRect = new Rect(column * Data.ColumnWidth, row * Data.RowsHeight, Data.ColumnWidth, Data.RowsHeight);
+
+                    double currentHeight = Data.HeaderHeight;
+
+                    while(currentHeight + 20 < arrangeRect.Height)
+                    {
+                        var appointmentItem = Children[currentAppointmentItemIndex++];
+                        appointmentItem.Visibility = Visibility.Visible;
+
+                        appointmentItem.Arrange(new Rect(arrangeRect.Left, arrangeRect.Top + currentHeight, arrangeRect.Width - 15, 20));
+                        appointmentItemsInUse.Add(appointmentItem);
+
+                        currentHeight += 20;
+                    }
+                }
+            }
+
+            foreach(var notUsedAppointmentItem in appointmentItems.Except(appointmentItemsInUse))
+            {
+                notUsedAppointmentItem.Visibility = Visibility.Collapsed;
+            }
+
+            return finalSize;
         }
     }
 }
