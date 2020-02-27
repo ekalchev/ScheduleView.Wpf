@@ -13,15 +13,29 @@ namespace ScheduleView.Wpf.Controls
     public class AppointmentItem : Control
     {
         private static readonly Brush fillBrush;
+        private static readonly Brush fillBrushHover;
         private static readonly Brush borderBrush;
         private static readonly Pen pen;
 
         private DpiScale dpiScale;
         private static readonly CultureInfo culture = CultureInfo.GetCultureInfo("en-us");
         private static readonly Typeface segoeTypeface = new Typeface("Segoe UI");
+        private static readonly Style style;
+
+        public Brush Background2
+        {
+            get { return (Brush)GetValue(Background2Property); }
+            set { SetValue(Background2Property, value); }
+        }
+
+        public static readonly DependencyProperty Background2Property =
+            DependencyProperty.Register("Background2", typeof(Brush), typeof(AppointmentItem), new FrameworkPropertyMetadata(Brushes.Transparent, FrameworkPropertyMetadataOptions.AffectsRender));
 
         static AppointmentItem()
         {
+            fillBrushHover = new SolidColorBrush(Colors.White);
+            fillBrushHover.Freeze();
+
             fillBrush = new SolidColorBrush(Colors.Orange);
             fillBrush.Freeze();
 
@@ -30,6 +44,32 @@ namespace ScheduleView.Wpf.Controls
 
             pen = new Pen(borderBrush, 1);
             pen.Freeze();
+
+            style = new Style(typeof(AppointmentItem));
+            style.Setters.Add(new Setter()
+            {
+                Property = Background2Property,
+                Value = fillBrush,
+            });
+
+            Trigger trigger = new Trigger()
+            {
+                Property = IsMouseOverProperty,
+                Value = true
+            };
+
+            trigger.Setters.Add(new Setter()
+            {
+                Property = Background2Property,
+                Value = Brushes.Red
+            });
+
+            style.Triggers.Add(trigger);
+        }
+
+        public AppointmentItem()
+        {
+            Style = style;
         }
 
         GlyphRun glyphRun;
@@ -56,7 +96,7 @@ namespace ScheduleView.Wpf.Controls
 
             var roundedArrangeBound = LayoutHelper.RoundLayoutSize(this.arrangeBounds);
 
-            drawingContext.DrawSnappedRectangle(new Rect(0,0, roundedArrangeBound.Width, roundedArrangeBound.Height), pen, fillBrush);
+            drawingContext.DrawSnappedRectangle(new Rect(0,0, roundedArrangeBound.Width, roundedArrangeBound.Height), pen, Background2);
 
             //if(formattedText == null)
             //{
