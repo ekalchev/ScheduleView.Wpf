@@ -22,17 +22,10 @@ namespace ScheduleView.Wpf.Controls
         private static readonly Typeface segoeTypeface = new Typeface("Segoe UI");
         private static readonly Style style;
 
-        public Brush Background2
-        {
-            get { return (Brush)GetValue(Background2Property); }
-            set { SetValue(Background2Property, value); }
-        }
-
-        public static readonly DependencyProperty Background2Property =
-            DependencyProperty.Register("Background2", typeof(Brush), typeof(AppointmentItem), new FrameworkPropertyMetadata(Brushes.Transparent, FrameworkPropertyMetadataOptions.AffectsRender));
-
         static AppointmentItem()
         {
+            BackgroundProperty.OverrideMetadata(typeof(AppointmentItem), new FrameworkPropertyMetadata((Brush)null, FrameworkPropertyMetadataOptions.AffectsRender));
+
             fillBrushHover = new SolidColorBrush(Colors.White);
             fillBrushHover.Freeze();
 
@@ -48,7 +41,7 @@ namespace ScheduleView.Wpf.Controls
             style = new Style(typeof(AppointmentItem));
             style.Setters.Add(new Setter()
             {
-                Property = Background2Property,
+                Property = BackgroundProperty,
                 Value = fillBrush,
             });
 
@@ -60,7 +53,7 @@ namespace ScheduleView.Wpf.Controls
 
             trigger.Setters.Add(new Setter()
             {
-                Property = Background2Property,
+                Property = BackgroundProperty,
                 Value = Brushes.Red
             });
 
@@ -73,6 +66,7 @@ namespace ScheduleView.Wpf.Controls
         }
 
         GlyphRun glyphRun;
+        FormattedText formattedText;
 
         private string text = Guid.NewGuid().ToString();
         private Size arrangeBounds;
@@ -96,27 +90,27 @@ namespace ScheduleView.Wpf.Controls
 
             var roundedArrangeBound = LayoutHelper.RoundLayoutSize(this.arrangeBounds);
 
-            drawingContext.DrawSnappedRectangle(new Rect(0,0, roundedArrangeBound.Width, roundedArrangeBound.Height), pen, Background2);
+            drawingContext.DrawSnappedRectangle(new Rect(0,0, roundedArrangeBound.Width, roundedArrangeBound.Height), pen, Background);
 
-            //if(formattedText == null)
-            //{
-            //    formattedText = new FormattedText(text,
-            //            culture,
-            //            this.FlowDirection,
-            //            segoeTypeface,
-            //            13,
-            //            Brushes.Black,
-            //            dpiScale.PixelsPerDip);
-            //}
-
-            //drawingContext.DrawText(formattedText, new Point(0,0));
-
-            if(glyphRun == null)
+            if (formattedText == null)
             {
-                glyphRun = CreateGlyphRun(text, 13, new Point(0, 0), dpiScale.PixelsPerDip);
+                formattedText = new FormattedText(text,
+                        culture,
+                        this.FlowDirection,
+                        segoeTypeface,
+                        13,
+                        Brushes.Black,
+                        dpiScale.PixelsPerDip);
             }
 
-            drawingContext.DrawGlyphRun(borderBrush, glyphRun);
+            drawingContext.DrawText(formattedText, new Point(0, 0));
+
+            //if (glyphRun == null)
+            //{
+            //    glyphRun = CreateGlyphRun(text, 13, new Point(0, 0), dpiScale.PixelsPerDip);
+            //}
+
+            //drawingContext.DrawGlyphRun(borderBrush, glyphRun);
         }
 
         private static Dictionary<ushort, double> glyphWidths = new Dictionary<ushort, double>();
