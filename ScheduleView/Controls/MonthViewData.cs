@@ -11,30 +11,20 @@ namespace ScheduleView.Wpf.Controls
     {
         public Rect[][] Cells { get; private set; }
 
-        public int ColumnsCount { get; } = 6;
-        public int RowsCount { get; } = 5;
+        public int ColumnsCount { get; } = 7;
+        public int RowsCount { get; private set; }
+
         public double HeaderHeight = LayoutHelper.RoundLayoutValue(20);
 
-        public void Update(Size availableSize)
+        public void Update(Size availableSize, double rowHeight, int numberOfRows)
         {
+            RowsHeight = rowHeight;
+            RowsCount = numberOfRows;
             ColumnWidth = LayoutHelper.RoundLayoutValue(availableSize.Width / ColumnsCount);
-            RowsHeight = LayoutHelper.RoundLayoutValue(availableSize.Height / RowsCount);
+
             Bounds = LayoutHelper.RoundLayoutRect2(new Rect(0, 0, ColumnWidth * ColumnsCount, RowsHeight * RowsCount));
 
             CalculateCells();
-        }
-
-        private double[] CalculateOffset(int count, double offset)
-        {
-            var offsets = new double[count];
-            double nextOffset = 0d;
-            for (int i = 0; i < count; i++)
-            {
-                offsets[i] = nextOffset;
-                nextOffset += offset;
-            }
-
-            return offsets;
         }
 
         private void CalculateCells()

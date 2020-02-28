@@ -10,7 +10,7 @@ using System.Windows.Media;
 
 namespace ScheduleView.Wpf.Controls
 {
-    internal class MonthViewGrid : Control
+    internal partial class MonthViewGrid : Control, IScheduleViewAware
     {
         private static readonly Brush lineBrush;
         private static readonly Pen linePen;
@@ -18,7 +18,7 @@ namespace ScheduleView.Wpf.Controls
         private static readonly CultureInfo culture = CultureInfo.GetCultureInfo("en-us");
         private static readonly Typeface segoeTypeface = new Typeface("Segoe UI");
 
-        internal ScheduleView ScheduleView { get; set; }
+        public ScheduleView ScheduleView { get; set; }
         private MonthViewData Data => ScheduleView.MonthsViewData;
 
         static MonthViewGrid()

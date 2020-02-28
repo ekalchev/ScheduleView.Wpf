@@ -13,6 +13,19 @@ namespace ScheduleView.Wpf.Controls
 {
     public class ScheduleView : Control
     {
+        static ScheduleView()
+        {
+            lineBrush = new SolidColorBrush(Colors.Red);
+            lineBrush.Freeze();
+
+            linePen = new Pen(lineBrush, 1);
+            linePen.Freeze();
+        }
+
+        public ScheduleView()
+        {
+        }
+
         private static readonly Brush lineBrush;
         private static readonly Pen linePen;
 
@@ -28,36 +41,36 @@ namespace ScheduleView.Wpf.Controls
 
         internal MonthViewData MonthsViewData { get; } = new MonthViewData();
         
-        static ScheduleView()
-        {
-            lineBrush = new SolidColorBrush(Colors.Red);
-            lineBrush.Freeze();
-
-            linePen = new Pen(lineBrush, 1);
-            linePen.Freeze();
-        }
-
-        public ScheduleView()
-        {
-        }
-
-        private MonthsViewAppointmentsPanel monthsViewPanel;
+        private MonthsViewAppointmentsPanel monthsViewAppointmentsPanel;
         private MonthViewGrid monthsViewGrid;
 
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            monthsViewPanel = this.GetTemplateChild("PART_MonthsViewAppointmentsPanel") as MonthsViewAppointmentsPanel;
-            monthsViewPanel.ScheduleView = this;
+            monthsViewAppointmentsPanel = this.GetTemplateChild("PART_MonthsViewAppointmentsPanel") as MonthsViewAppointmentsPanel;
+
+            if (monthsViewAppointmentsPanel != null)
+            {
+                monthsViewAppointmentsPanel.ScheduleView = this;
+            }
 
             monthsViewGrid = this.GetTemplateChild("PART_MonthsViewGrid") as MonthViewGrid;
-            monthsViewGrid.ScheduleView = this;
+
+            if (monthsViewGrid != null)
+            {
+                monthsViewGrid.ScheduleView = this;
+            }
+
+            var scrollViewer = this.GetTemplateChild("PART_ScrollPanel") as IScheduleViewAware;
+
+            if (scrollViewer != null)
+            {
+                scrollViewer.ScheduleView = this;
+            }
         }
 
         protected override Size MeasureOverride(Size constraint)
         {
-            MonthsViewData.Update(constraint);
-
             return base.MeasureOverride(constraint);
         }
     }
