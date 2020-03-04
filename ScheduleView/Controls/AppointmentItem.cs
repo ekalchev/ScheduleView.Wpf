@@ -103,7 +103,7 @@ namespace ScheduleView.Wpf.Controls
                         dpiScale.PixelsPerDip);
             }
 
-            drawingContext.DrawText(formattedText, new Point(0, 0));
+            //drawingContext.DrawText(formattedText, new Point(0, 0));
 
             //if (glyphRun == null)
             //{
@@ -137,7 +137,7 @@ namespace ScheduleView.Wpf.Controls
                 ushort glyphIndex = (ushort)(text[n] - 29);
                 glyphIndexes[n] = glyphIndex;
 
-                if (!glyphWidths.TryGetValue(glyphIndex, out glyphWidth))
+                if (glyphWidths.TryGetValue(glyphIndex, out glyphWidth) == false)
                 {
                     glyphWidth = glyphTypeface.AdvanceWidths[glyphIndex] * size;
                     glyphWidths.Add(glyphIndex, glyphWidth);

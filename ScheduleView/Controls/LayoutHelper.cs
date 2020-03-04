@@ -56,6 +56,29 @@ namespace ScheduleView.Wpf.Controls
             return newValue;
         }
 
+        public static double FloorLayoutValue(double value)
+        {
+            double newValue;
+            // If DPI == 1, don't use DPI-aware rounding.
+            if (!DoubleUtil.AreClose(DpiScale, 1.0))
+            {
+                newValue = Math.Floor(value * DpiScale) / DpiScale;
+                // If rounding produces a value unacceptable to layout (NaN, Infinity or MaxValue), use the original value.
+                if (DoubleUtil.IsNaN(newValue) ||
+                    Double.IsInfinity(newValue) ||
+                    DoubleUtil.AreClose(newValue, Double.MaxValue))
+                {
+                    newValue = value;
+                }
+            }
+            else
+            {
+                newValue = Math.Round(value);
+            }
+
+            return newValue;
+        }
+
         public static Size RoundLayoutSize(Size size)
         {
             return new Size(RoundLayoutValue(size.Width), RoundLayoutValue(size.Height));

@@ -6,6 +6,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/MonthViewDayContainerStyle.xaml" />
                 <ResourceDictionary Source="Styles/ScheduleViewStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

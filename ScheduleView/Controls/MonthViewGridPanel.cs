@@ -10,7 +10,7 @@ using System.Windows.Media;
 
 namespace ScheduleView.Wpf.Controls
 {
-    internal class MonthViewGrid : Control
+    internal partial class MonthViewGridPanel : Panel
     {
         private static readonly Brush lineBrush;
         private static readonly Pen linePen;
@@ -21,7 +21,7 @@ namespace ScheduleView.Wpf.Controls
         internal ScheduleView ScheduleView { get; set; }
         private MonthViewData Data => ScheduleView.MonthsViewData;
 
-        static MonthViewGrid()
+        static MonthViewGridPanel()
         {
             lineBrush = new SolidColorBrush(Colors.Red);
             lineBrush.Freeze();

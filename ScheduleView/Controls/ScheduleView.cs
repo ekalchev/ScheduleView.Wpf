@@ -42,7 +42,7 @@ namespace ScheduleView.Wpf.Controls
         }
 
         private MonthsViewAppointmentsPanel monthsViewPanel;
-        private MonthViewGrid monthsViewGrid;
+        private MonthViewPanel monthsViewGrid;
 
         public override void OnApplyTemplate()
         {
@@ -50,7 +50,7 @@ namespace ScheduleView.Wpf.Controls
             monthsViewPanel = this.GetTemplateChild("PART_MonthsViewAppointmentsPanel") as MonthsViewAppointmentsPanel;
             monthsViewPanel.ScheduleView = this;
 
-            monthsViewGrid = this.GetTemplateChild("PART_MonthsViewGrid") as MonthViewGrid;
+            monthsViewGrid = this.GetTemplateChild("PART_MonthsViewGrid") as MonthViewPanel;
             monthsViewGrid.ScheduleView = this;
         }
 

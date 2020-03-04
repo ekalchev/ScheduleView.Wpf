@@ -7,13 +7,15 @@
             <Setter.Value>
                 <ControlTemplate>
                     <Grid Background="LightBlue">
-                        <controls:MonthViewGrid x:Name="PART_MonthsViewGrid" />
-                        <controls:MonthsViewAppointmentsPanel x:Name="PART_MonthsViewAppointmentsPanel"></controls:MonthsViewAppointmentsPanel>
+                        <!--<ScrollViewer CanContentScroll="True">-->
+                            <controls:MonthViewPanel x:Name="PART_MonthsViewGrid" />
+                        <!--</ScrollViewer>-->
+                        <controls:MonthsViewAppointmentsPanel x:Name="PART_MonthsViewAppointmentsPanel" Visibility="Hidden"/>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style  TargetType="{x:Type controls:ScheduleView}" BasedOn="{StaticResource ScheduleViewDefaultStyle}" />
 </ResourceDictionary>

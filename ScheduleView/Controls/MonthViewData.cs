@@ -9,48 +9,70 @@ namespace ScheduleView.Wpf.Controls
 {
     internal class MonthViewData
     {
-        public Rect[][] Cells { get; private set; }
+        public Rect[][] Grid { get; private set; }
+        public Size GridCellSize { get; private set; }
 
-        public int ColumnsCount { get; } = 6;
-        public int RowsCount { get; } = 5;
+        public int ColumnsCount { get; }
+        public int RowsCount { get; }
+        public int CellsCount { get; }
+
         public double HeaderHeight = LayoutHelper.RoundLayoutValue(20);
+
+        public MonthViewData()
+        {
+            ColumnsCount = 7;
+            RowsCount = 5;
+            CellsCount = RowsCount * ColumnsCount;
+        }
 
         public void Update(Size availableSize)
         {
             ColumnWidth = LayoutHelper.RoundLayoutValue(availableSize.Width / ColumnsCount);
-            RowsHeight = LayoutHelper.RoundLayoutValue(availableSize.Height / RowsCount);
-            Bounds = LayoutHelper.RoundLayoutRect2(new Rect(0, 0, ColumnWidth * ColumnsCount, RowsHeight * RowsCount));
 
-            CalculateCells();
-        }
-
-        private double[] CalculateOffset(int count, double offset)
-        {
-            var offsets = new double[count];
-            double nextOffset = 0d;
-            for (int i = 0; i < count; i++)
+            if (DoubleUtil.GreaterThanOrClose(ColumnWidth * ColumnsCount, availableSize.Width) == true)
             {
-                offsets[i] = nextOffset;
-                nextOffset += offset;
+                ColumnWidth = LayoutHelper.FloorLayoutValue(availableSize.Width / ColumnsCount);
             }
 
-            return offsets;
+            RowsHeight = LayoutHelper.RoundLayoutValue(availableSize.Height / RowsCount);
+
+            if (DoubleUtil.GreaterThanOrClose(RowsHeight * RowsCount, availableSize.Height) == true)
+            {
+                RowsHeight = LayoutHelper.FloorLayoutValue(availableSize.Height / RowsCount);
+            }
+
+            GridCellSize = new Size(ColumnWidth, RowsHeight);
+
+            Bounds = LayoutHelper.RoundLayoutRect3(new Rect(0, 0, ColumnWidth * ColumnsCount, RowsHeight * RowsCount));
+
+            double columnOffset = 0;
+            Grid = new Rect[RowsCount][];
+
+            for (int rowIndex = 0; rowIndex < RowsCount; rowIndex++)
+            {
+                columnOffset = 0;
+                Grid[rowIndex] = new Rect[ColumnsCount];
+
+                for (int columnIndex = 0; columnIndex < ColumnsCount; columnIndex++)
+                {
+                    // ColumnWidth and RowHeight should be already layout rounded - so no need to round the rect bounds
+                    Grid[rowIndex][columnIndex] = new Rect(columnIndex * ColumnWidth, rowIndex * RowsHeight, ColumnWidth, RowsHeight);
+                }
+
+                columnOffset += ColumnWidth;
+            }
         }
 
-        private void CalculateCells()
+        public IEnumerable<Rect> GridCells
         {
-            var rowsCount = RowsCount;
-            var columnsCount = ColumnsCount;
-
-            Cells = new Rect[rowsCount][];
-
-            for (int row = 0; row < rowsCount; row++)
+            get
             {
-                Cells[row] = new Rect[columnsCount];
-
-                for (int column = 0; column < columnsCount; column++)
+                for (int rowIndex = 0; rowIndex < RowsCount; rowIndex++)
                 {
-                    Cells[row][column] = new Rect(column * ColumnWidth, row * RowsHeight, column + 1 * ColumnWidth, row + 1 * RowsHeight);
+                    for (int columnIndex = 0; columnIndex < ColumnsCount; columnIndex++)
+                    {
+                        yield return Grid[rowIndex][columnIndex];
+                    }
                 }
             }
         }
