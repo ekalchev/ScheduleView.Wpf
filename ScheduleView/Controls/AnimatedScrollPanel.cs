@@ -29,7 +29,7 @@ namespace ScheduleView.Wpf.Controls
             scrollOffset = scrollLine = LayoutHelper.RoundLayoutValue(availableSize.Height / (rowsCount - 2));
             extendSize = new Size(availableSize.Width, availableSize.Height + (scrollLine * 2));
 
-            ScheduleView.MonthsViewData.Update(extendSize, scrollLine, rowsCount);
+            ScheduleView.MonthsViewData.Update(availableSize);
 
             foreach (var child in Children.OfType<UIElement>())
             {
