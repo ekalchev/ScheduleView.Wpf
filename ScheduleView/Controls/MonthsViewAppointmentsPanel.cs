@@ -9,10 +9,10 @@ using System.Windows.Shapes;
 
 namespace ScheduleView.Wpf.Controls
 {
-    public class MonthsViewAppointmentsPanel : Panel
+    internal class MonthsViewAppointmentsPanel : Panel, IScheduleViewAware
     {
         private List<AppointmentItem> appointmentItems = new List<AppointmentItem>();
-        internal ScheduleView ScheduleView { get; set; }
+        public ScheduleView ScheduleView { get; set; }
 
         private MonthViewData Data => ScheduleView.MonthsViewData;
 
