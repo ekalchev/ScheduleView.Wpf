@@ -50,10 +50,10 @@ namespace ScheduleView.Wpf.Controls
         protected override Size ArrangeOverride(Size finalSize)
         {
             int currentItemIndex = 0;
-            foreach(var cell in MonthViewData.GridCells)
+            foreach(var day in MonthViewData.GridDays)
             {
                 var currentItem = monthViewDayItems[currentItemIndex++];
-                currentItem.Arrange(cell);
+                currentItem.Arrange(day.GridCell);
             }
 
             return finalSize;

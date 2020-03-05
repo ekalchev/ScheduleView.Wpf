@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodaTime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace ScheduleView.Wpf.Controls
 {
     internal class MonthViewData
     {
-        public Rect[][] Grid { get; private set; }
+        public MonthViewDay[][] Grid { get; private set; }
         public Size GridCellSize { get; private set; }
 
         public int ColumnsCount { get; }
@@ -25,7 +26,7 @@ namespace ScheduleView.Wpf.Controls
             CellsCount = RowsCount * ColumnsCount;
         }
 
-        public void Update(Size availableSize)
+        public void Update(Size availableSize, Instant firstVisibleDay, IEnumerable<IAppointmentItem> appointmentItems)
         {
             ColumnWidth = LayoutHelper.RoundLayoutValue(availableSize.Width / ColumnsCount);
 
@@ -46,24 +47,30 @@ namespace ScheduleView.Wpf.Controls
             Bounds = LayoutHelper.RoundLayoutRect3(new Rect(0, 0, ColumnWidth * ColumnsCount, RowsHeight * RowsCount));
 
             double columnOffset = 0;
-            Grid = new Rect[RowsCount][];
+            Grid = new MonthViewDay[RowsCount][];
+            Instant currentDay = firstVisibleDay;
 
             for (int rowIndex = 0; rowIndex < RowsCount; rowIndex++)
             {
                 columnOffset = 0;
-                Grid[rowIndex] = new Rect[ColumnsCount];
+                Grid[rowIndex] = new MonthViewDay[ColumnsCount];
 
                 for (int columnIndex = 0; columnIndex < ColumnsCount; columnIndex++)
                 {
                     // ColumnWidth and RowHeight should be already layout rounded - so no need to round the rect bounds
-                    Grid[rowIndex][columnIndex] = new Rect(columnIndex * ColumnWidth, rowIndex * RowsHeight, ColumnWidth, RowsHeight);
+                    var day = new MonthViewDay();
+                    day.GridCell = new Rect(columnIndex * ColumnWidth, rowIndex * RowsHeight, ColumnWidth, RowsHeight);
+                    var nextDay = currentDay.Plus(NodaTime.Duration.FromDays(1));
+                    day.Day = new Interval(currentDay, nextDay); // may be we should use 23:59:99999 as end interval?????
+                    currentDay = nextDay;
+                    Grid[rowIndex][columnIndex] = day;
                 }
 
                 columnOffset += ColumnWidth;
             }
         }
 
-        public IEnumerable<Rect> GridCells
+        public IEnumerable<MonthViewDay> GridDays
         {
             get
             {

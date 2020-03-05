@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodaTime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,29 +14,16 @@ namespace ScheduleView.Wpf.Controls
 {
     public class ScheduleView : Control
     {
-        private static readonly Brush lineBrush;
-        private static readonly Pen linePen;
-
-        public double Pos
-        {
-            get { return (double)GetValue(PosProperty); }
-            set { SetValue(PosProperty, value); }
-        }
-
-        public static readonly DependencyProperty PosProperty =
-            DependencyProperty.Register("Pos", typeof(double), typeof(ScheduleView), new FrameworkPropertyMetadata(0.0d, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsParentMeasure));
-
-
         internal MonthViewData MonthsViewData { get; } = new MonthViewData();
-        
-        static ScheduleView()
-        {
-            lineBrush = new SolidColorBrush(Colors.Red);
-            lineBrush.Freeze();
 
-            linePen = new Pen(lineBrush, 1);
-            linePen.Freeze();
+        public IEnumerable<IAppointmentItem> AppointmentItems
+        {
+            get { return (IEnumerable<IAppointmentItem>)GetValue(AppointmentItemsProperty); }
+            set { SetValue(AppointmentItemsProperty, value); }
         }
+
+        public static readonly DependencyProperty AppointmentItemsProperty =
+            DependencyProperty.Register("AppointmentItems", typeof(IEnumerable<IAppointmentItem>), typeof(ScheduleView), new PropertyMetadata(null));
 
         public ScheduleView()
         {
@@ -56,7 +44,7 @@ namespace ScheduleView.Wpf.Controls
 
         protected override Size MeasureOverride(Size constraint)
         {
-            MonthsViewData.Update(constraint);
+            MonthsViewData.Update(constraint, SystemClock.Instance.GetCurrentInstant(), AppointmentItems);
 
             return base.MeasureOverride(constraint);
         }

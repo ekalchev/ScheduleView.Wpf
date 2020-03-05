@@ -92,16 +92,16 @@ namespace ScheduleView.Wpf.Controls
 
             drawingContext.DrawSnappedRectangle(new Rect(0,0, roundedArrangeBound.Width, roundedArrangeBound.Height), pen, Background);
 
-            if (formattedText == null)
-            {
-                formattedText = new FormattedText(text,
-                        culture,
-                        this.FlowDirection,
-                        segoeTypeface,
-                        13,
-                        Brushes.Black,
-                        dpiScale.PixelsPerDip);
-            }
+            //if (formattedText == null)
+            //{
+            //    formattedText = new FormattedText(text,
+            //            culture,
+            //            this.FlowDirection,
+            //            segoeTypeface,
+            //            13,
+            //            Brushes.Black,
+            //            dpiScale.PixelsPerDip);
+            //}
 
             //drawingContext.DrawText(formattedText, new Point(0, 0));
 

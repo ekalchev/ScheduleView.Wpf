@@ -10,7 +10,7 @@
                         <!--<ScrollViewer CanContentScroll="True">-->
                             <controls:MonthViewPanel x:Name="PART_MonthsViewGrid" />
                         <!--</ScrollViewer>-->
-                        <controls:MonthsViewAppointmentsPanel x:Name="PART_MonthsViewAppointmentsPanel" Visibility="Hidden"/>
+                        <controls:MonthsViewAppointmentsPanel x:Name="PART_MonthsViewAppointmentsPanel" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
