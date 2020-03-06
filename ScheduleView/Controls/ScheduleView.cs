@@ -1,4 +1,5 @@
 ﻿using NodaTime;
+using ScheduleView.Wpf.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,14 +17,14 @@ namespace ScheduleView.Wpf.Controls
     {
         internal MonthViewData MonthsViewData { get; } = new MonthViewData();
 
-        public IEnumerable<IAppointmentItem> AppointmentItems
+        public IEnumerable<Occurrence> AppointmentItems
         {
-            get { return (IEnumerable<IAppointmentItem>)GetValue(AppointmentItemsProperty); }
+            get { return (IEnumerable<Occurrence>)GetValue(AppointmentItemsProperty); }
             set { SetValue(AppointmentItemsProperty, value); }
         }
 
         public static readonly DependencyProperty AppointmentItemsProperty =
-            DependencyProperty.Register("AppointmentItems", typeof(IEnumerable<IAppointmentItem>), typeof(ScheduleView), new PropertyMetadata(null));
+            DependencyProperty.Register("AppointmentItems", typeof(IEnumerable<Occurrence>), typeof(ScheduleView), new PropertyMetadata(null));
 
         public ScheduleView()
         {

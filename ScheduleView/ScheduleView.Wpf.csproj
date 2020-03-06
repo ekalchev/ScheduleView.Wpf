@@ -62,7 +62,7 @@
     </ApplicationDefinition>
     <Compile Include="Controls\AppointmentItem.cs" />
     <Compile Include="Controls\DrawingContextExtensions.cs" />
-    <Compile Include="Controls\IAppointmentItem.cs" />
+    <Compile Include="Data\Appointment.cs" />
     <Compile Include="Controls\IScheduleViewAware.cs" />
     <Compile Include="Controls\LayoutHelper.cs" />
     <Compile Include="Controls\MonthsViewAppointmentsPanel.cs" />
@@ -82,6 +82,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controls\AnimatedScrollPanel.cs" />
+    <Compile Include="Data\Occurrence.cs" />
+    <Compile Include="Data\OccurrenceType.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

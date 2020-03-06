@@ -1,4 +1,5 @@
 ﻿using NodaTime;
+using ScheduleView.Wpf.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace ScheduleView.Wpf.Controls
             CellsCount = RowsCount * ColumnsCount;
         }
 
-        public void Update(Size availableSize, Instant firstVisibleDay, IEnumerable<IAppointmentItem> appointmentItems)
+        public void Update(Size availableSize, Instant firstVisibleDay, IEnumerable<Occurrence> appointmentItems)
         {
             ColumnWidth = LayoutHelper.RoundLayoutValue(availableSize.Width / ColumnsCount);
 
