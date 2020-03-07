@@ -5,16 +5,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ScheduleView.Wpf.Controls
 {
-    internal class MonthViewPanel : Panel
+    internal partial class MonthViewPanel : Panel
     {
         MonthViewDayContainer[] monthViewDayItems = null;
+
         Size lastMeasureSize;
 
         public MonthViewPanel()
         {
+            MouseMove += MonthViewPanel_MouseMove;
+            MouseLeftButtonDown += MonthViewPanel_MouseLeftButtonDown;
+            MouseLeftButtonUp += MonthViewPanel_MouseLeftButtonUp;
         }
 
         internal ScheduleView ScheduleView { get; set; }

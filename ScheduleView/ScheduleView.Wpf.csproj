@@ -80,6 +80,7 @@
     <Compile Include="Controls\ControlCache.cs" />
     <Compile Include="Controls\DrawingContextExtensions.cs" />
     <Compile Include="Controls\ExpandArrow.cs" />
+    <Compile Include="Controls\MonthViewPanel.Selection.cs" />
     <Compile Include="Data\Appointment.cs" />
     <Compile Include="Controls\IScheduleViewAware.cs" />
     <Compile Include="Controls\LayoutHelper.cs" />
