@@ -1,6 +1,7 @@
 ﻿using ScheduleView.Wpf.Data;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,13 +14,20 @@ namespace ScheduleView.Wpf.Controls
     internal class MonthsViewAppointmentsPanel : Panel
     {
         private Stack<AppointmentItem> appointmentItemsCache = new Stack<AppointmentItem>();
+        private IControlCache<UIElement> hiddenAppointmentsButtonsCache;
+
         private Dictionary<Occurrence, OccurrenceContainer> occurenceContainerMap = new Dictionary<Occurrence, OccurrenceContainer>();
+        private IEnumerable<AppointmentMeasureGroup> appointmentMeasureGroups = Enumerable.Empty<AppointmentMeasureGroup>();
 
         public IEnumerable<Occurrence> Occurrences { get; set; }
         public MonthViewData Data { get; set; }
+        private int measureCounter = 0;
+        private int arrangeCounter = 0;
 
         public MonthsViewAppointmentsPanel()
         {
+            hiddenAppointmentsButtonsCache = new ControlCache<ExpandArrow>(0);
+
             for (int i = 0; i < 500; i++)
             {
                 var appointmentItem = new AppointmentItem();
@@ -28,8 +36,23 @@ namespace ScheduleView.Wpf.Controls
             }
         }
 
+        /// <summary>
+        /// We assume that measure size == arrange size
+        /// </summary>
+        /// <param name="availableSize"></param>
+        /// <returns></returns>
         protected override Size MeasureOverride(Size availableSize)
         {
+            Debug.WriteLine($"measure {measureCounter++}");
+
+            // dispose previous measurement groups
+            foreach (var appointmentMeasureGroup in appointmentMeasureGroups)
+            {
+                appointmentMeasureGroup.Dispose();
+            }
+
+            Dictionary<Rect, AppointmentMeasureGroup> rectGroups = new Dictionary<Rect, AppointmentMeasureGroup>();
+
             // occurrence map that will be used in this measure
             var newOccurenceContainerMap = new Dictionary<Occurrence, OccurrenceContainer>();
 
@@ -54,7 +77,29 @@ namespace ScheduleView.Wpf.Controls
                     };
                 }
 
+                // group appointmentItems in groups by grid cells 
+
+                // find in which grid cell the occurrent should be arranged
+                var rect = Data.Intersect(occurrence.Interval);
+
+                if (rect.HasValue)
+                {
+                    if (rectGroups.ContainsKey(rect.Value) == false)
+                    {
+                        rectGroups.Add(rect.Value, new AppointmentMeasureGroup(rect.Value, this, hiddenAppointmentsButtonsCache.Get()));
+                    }
+
+                    rectGroups[rect.Value].Add(occurrenceContainer.Container);
+                }
+
                 newOccurenceContainerMap.Add(occurrence, occurrenceContainer);
+            }
+
+            appointmentMeasureGroups = rectGroups.Values;
+
+            foreach(var appointmentMeasureGroup in appointmentMeasureGroups)
+            {
+                appointmentMeasureGroup.PrepareAppointments();
             }
 
             // move unmatched containers back to cache
@@ -65,66 +110,16 @@ namespace ScheduleView.Wpf.Controls
 
             occurenceContainerMap = newOccurenceContainerMap;
 
-            // TODO: this loop can be avoided if measure is done above
-            foreach (var occurenceContainer in occurenceContainerMap.Values)
-            {
-                occurenceContainer.Container.Measure(Data.GridCellSize);
-            }
-
             return availableSize;
         }
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            Dictionary<Rect, List<AppointmentItem>> rectGroups = new Dictionary<Rect, List<AppointmentItem>>();
+            Debug.WriteLine($"arrange {arrangeCounter++}");
 
-            // group appointmentItems in groups by arrange rects 
-            foreach (var occurrenceContainer in occurenceContainerMap.Values)
+            foreach (var appointmentMeasureGroup in appointmentMeasureGroups)
             {
-                var rect = Data.Intersect(occurrenceContainer.Occurrence.Interval);
-
-                if (rect.HasValue)
-                {
-                    if (rectGroups.ContainsKey(rect.Value) == false)
-                    {
-                        rectGroups.Add(rect.Value, new List<AppointmentItem>());
-                    }
-
-                    rectGroups[rect.Value].Add(occurrenceContainer.Container);
-                }
-            }
-
-            double headerHeight = 20;
-            double currentOffset;
-            double appointmentItemHeight = 20;
-            Thickness margin = new Thickness(0, 0, 15, 5);
-            Rect arrangeRect;
-
-            foreach (var rectGroup in rectGroups)
-            {
-                arrangeRect = rectGroup.Key;
-                currentOffset = headerHeight;
-
-                foreach (var appointmentItem in rectGroup.Value)
-                {
-                    if (currentOffset + appointmentItemHeight < arrangeRect.Height)
-                    {
-                        appointmentItem.Arrange(new Rect(arrangeRect.Left, arrangeRect.Top + currentOffset, arrangeRect.Width - margin.Right, appointmentItemHeight));
-                        appointmentItem.Visibility = Visibility.Visible;
-                        currentOffset += appointmentItemHeight + margin.Bottom;
-                    }
-                    else
-                    {
-                        // there are hidden appointments
-
-                        appointmentItem.Visibility = Visibility.Hidden;
-                    }
-                }
-            }
-
-            foreach (var notUsedAppointmentItem in appointmentItemsCache)
-            {
-                notUsedAppointmentItem.Visibility = Visibility.Collapsed;
+                appointmentMeasureGroup.ArrangeVisibleAppointments();
             }
 
             return finalSize;
@@ -134,6 +129,86 @@ namespace ScheduleView.Wpf.Controls
         {
             public Occurrence Occurrence { get; set; }
             public AppointmentItem Container { get; set; }
+        }
+
+        private class AppointmentMeasureGroup : IDisposable
+        {
+            private double headerHeight = LayoutHelper.RoundLayoutValue(20);
+            private double currentOffset;
+            private double appointmentItemHeight = LayoutHelper.RoundLayoutValue(20);
+            private Thickness margin = new Thickness(0, 0, LayoutHelper.RoundLayoutValue(15), LayoutHelper.RoundLayoutValue(5));
+
+            private List<AppointmentItem> visibleAppointments = new List<AppointmentItem>();
+            private List<AppointmentItem> hiddenAppointments = new List<AppointmentItem>();
+            private readonly Panel panel;
+            private readonly ICacheItem<UIElement> expandButton;
+
+            public AppointmentMeasureGroup(Rect rect, Panel panel, ICacheItem<UIElement> expandButton)
+            {
+                Rect = rect;
+                this.panel = panel;
+                this.expandButton = expandButton;
+                currentOffset = headerHeight;
+            }
+
+            public Rect Rect { get; }
+            public IEnumerable<AppointmentItem> VisibleAppointments => visibleAppointments;
+            public IEnumerable<AppointmentItem> HiddenAppointments => hiddenAppointments;
+
+            public void PrepareAppointments()
+            {
+                foreach (var visibleAppointment in VisibleAppointments)
+                {
+                    visibleAppointment.Visibility = Visibility.Visible;
+                    visibleAppointment.Measure(new Size(Rect.Width - margin.Right, appointmentItemHeight));
+                }
+
+                foreach (var hiddenAppointment in HiddenAppointments)
+                {
+                    hiddenAppointment.Visibility = Visibility.Hidden;
+                }
+
+                if(HiddenAppointments.Count() > 0)
+                {
+                    panel.Children.Add(expandButton.Item);
+                    expandButton.Item.Measure(Rect.Size);
+                }
+            }
+
+            public void ArrangeVisibleAppointments()
+            {
+                double currentOffset = this.headerHeight;
+
+                foreach (var visibleAppointment in VisibleAppointments)
+                {
+                    visibleAppointment.Arrange(new Rect(Rect.Left, Rect.Top + currentOffset, Rect.Width - margin.Right, appointmentItemHeight));
+                    currentOffset += appointmentItemHeight + margin.Bottom;
+                }
+
+                if (HiddenAppointments.Count() > 0)
+                {
+                    expandButton.Item.Arrange(new Rect(Rect.Right - expandButton.Item.DesiredSize.Width, Rect.Bottom - expandButton.Item.DesiredSize.Height, expandButton.Item.DesiredSize.Width, expandButton.Item.DesiredSize.Height));
+                }
+            }
+
+            public void Add(AppointmentItem appointmentItem)
+            {
+                if (currentOffset + appointmentItemHeight < Rect.Height)
+                {
+                    visibleAppointments.Add(appointmentItem);
+                    currentOffset += appointmentItemHeight + margin.Bottom;
+                }
+                else
+                {
+                    hiddenAppointments.Add(appointmentItem);
+                }
+            }
+
+            public void Dispose()
+            {
+                panel.Children.Remove(expandButton.Item);
+                expandButton.Dispose();
+            }
         }
     }
 }

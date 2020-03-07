@@ -77,7 +77,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controls\AppointmentItem.cs" />
+    <Compile Include="Controls\ControlCache.cs" />
     <Compile Include="Controls\DrawingContextExtensions.cs" />
+    <Compile Include="Controls\ExpandArrow.cs" />
     <Compile Include="Data\Appointment.cs" />
     <Compile Include="Controls\IScheduleViewAware.cs" />
     <Compile Include="Controls\LayoutHelper.cs" />
@@ -106,6 +108,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Styles\MonthViewDayContainerStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Styles\ExpandArrowStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

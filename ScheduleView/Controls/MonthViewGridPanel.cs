@@ -10,94 +10,95 @@ using System.Windows.Media;
 
 namespace ScheduleView.Wpf.Controls
 {
-    internal partial class MonthViewGridPanel : Panel
-    {
-        private static readonly Brush lineBrush;
-        private static readonly Pen linePen;
-        private DpiScale dpiScale;
-        private static readonly CultureInfo culture = CultureInfo.GetCultureInfo("en-us");
-        private static readonly Typeface segoeTypeface = new Typeface("Segoe UI");
+    //internal partial class MonthViewGridPanel : Panel
+    //{
+    //    private static readonly Brush lineBrush;
+    //    private static readonly Pen linePen;
+    //    private DpiScale dpiScale;
+    //    private static readonly CultureInfo culture = CultureInfo.GetCultureInfo("en-us");
+    //    private static readonly Typeface segoeTypeface = new Typeface("Segoe UI");
 
-        internal ScheduleView ScheduleView { get; set; }
-        private MonthViewData Data => ScheduleView.MonthsViewData;
+    //    internal ScheduleView ScheduleView { get; set; }
+    //    private MonthViewData Data => ScheduleView.MonthsViewData;
 
-        static MonthViewGridPanel()
-        {
-            lineBrush = new SolidColorBrush(Colors.Red);
-            lineBrush.Freeze();
+    //    static MonthViewGridPanel()
+    //    {
+    //        lineBrush = new SolidColorBrush(Colors.Red);
+    //        lineBrush.Freeze();
 
-            linePen = new Pen(lineBrush, 1);
-            linePen.Freeze();
-        }
+    //        linePen = new Pen(lineBrush, 1);
+    //        linePen.Freeze();
+    //    }
 
-        public override void OnApplyTemplate()
-        {
-            base.OnApplyTemplate();
-            dpiScale = VisualTreeHelper.GetDpi(this);
-        }
+    //    public override void OnApplyTemplate()
+    //    {
+    //        base.OnApplyTemplate();
+    //        dpiScale = VisualTreeHelper.GetDpi(this);
+    //    }
 
-        protected override Size MeasureOverride(Size constraint)
-        {
-            return base.MeasureOverride(constraint);
-        }
+    //    protected override Size MeasureOverride(Size constraint)
+    //    {
+    //        Children.Add(new Button());
+    //        return base.MeasureOverride(constraint);
+    //    }
 
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            double columnOffset = 0;
-            for (int i = 0; i < Data.ColumnsCount; i++)
-            {
-                drawingContext.DrawVerticalSnappedLine(
-                    new Point(Data.Bounds.TopLeft.X + columnOffset, Data.Bounds.TopLeft.Y),
-                    new Point(Data.Bounds.BottomLeft.X + columnOffset, Data.Bounds.BottomLeft.Y),
-                    linePen);
+    //    protected override void OnRender(DrawingContext drawingContext)
+    //    {
+    //        double columnOffset = 0;
+    //        for (int i = 0; i < Data.ColumnsCount; i++)
+    //        {
+    //            drawingContext.DrawVerticalSnappedLine(
+    //                new Point(Data.Bounds.TopLeft.X + columnOffset, Data.Bounds.TopLeft.Y),
+    //                new Point(Data.Bounds.BottomLeft.X + columnOffset, Data.Bounds.BottomLeft.Y),
+    //                linePen);
 
-                columnOffset += Data.ColumnWidth;
-            }
+    //            columnOffset += Data.ColumnWidth;
+    //        }
 
-            drawingContext.DrawVerticalSnappedLine(
-                    new Point(Data.Bounds.TopLeft.X + columnOffset, Data.Bounds.TopLeft.Y),
-                    new Point(Data.Bounds.BottomLeft.X + columnOffset, Data.Bounds.BottomLeft.Y),
-                    linePen);
+    //        drawingContext.DrawVerticalSnappedLine(
+    //                new Point(Data.Bounds.TopLeft.X + columnOffset, Data.Bounds.TopLeft.Y),
+    //                new Point(Data.Bounds.BottomLeft.X + columnOffset, Data.Bounds.BottomLeft.Y),
+    //                linePen);
 
-            double rowOffset = 0;
-            for (int i = 0; i < Data.RowsCount; i++)
-            {
-                drawingContext.DrawHorizontalSnappedLine(
-                    new Point(Data.Bounds.TopLeft.X, Data.Bounds.TopLeft.Y + rowOffset),
-                    new Point(Data.Bounds.TopRight.X, Data.Bounds.TopRight.Y + rowOffset),
-                    linePen);
+    //        double rowOffset = 0;
+    //        for (int i = 0; i < Data.RowsCount; i++)
+    //        {
+    //            drawingContext.DrawHorizontalSnappedLine(
+    //                new Point(Data.Bounds.TopLeft.X, Data.Bounds.TopLeft.Y + rowOffset),
+    //                new Point(Data.Bounds.TopRight.X, Data.Bounds.TopRight.Y + rowOffset),
+    //                linePen);
 
-                rowOffset += Data.RowsHeight;
-            }
+    //            rowOffset += Data.RowsHeight;
+    //        }
 
-            drawingContext.DrawHorizontalSnappedLine(
-                new Point(Data.Bounds.TopLeft.X, Data.Bounds.TopLeft.Y + rowOffset),
-                new Point(Data.Bounds.TopRight.X, Data.Bounds.TopRight.Y + rowOffset),
-                linePen);
+    //        drawingContext.DrawHorizontalSnappedLine(
+    //            new Point(Data.Bounds.TopLeft.X, Data.Bounds.TopLeft.Y + rowOffset),
+    //            new Point(Data.Bounds.TopRight.X, Data.Bounds.TopRight.Y + rowOffset),
+    //            linePen);
 
             
-            columnOffset = 0;
-            double textOffset = 5;
-            for (int i = 0; i < Data.ColumnsCount; i++)
-            {
-                rowOffset = 0;
+    //        columnOffset = 0;
+    //        double textOffset = 5;
+    //        for (int i = 0; i < Data.ColumnsCount; i++)
+    //        {
+    //            rowOffset = 0;
 
-                for (int j = 0; j < Data.RowsCount; j++)
-                {
-                    FormattedText formattedText = new FormattedText((i + j).ToString(),
-                        culture,
-                        this.FlowDirection,
-                        segoeTypeface,
-                        13,
-                        Brushes.Black,
-                        dpiScale.PixelsPerDip);
+    //            for (int j = 0; j < Data.RowsCount; j++)
+    //            {
+    //                FormattedText formattedText = new FormattedText((i + j).ToString(),
+    //                    culture,
+    //                    this.FlowDirection,
+    //                    segoeTypeface,
+    //                    13,
+    //                    Brushes.Black,
+    //                    dpiScale.PixelsPerDip);
 
-                    drawingContext.DrawText(formattedText, new Point(columnOffset + textOffset, rowOffset));
-                    rowOffset += Data.RowsHeight;
-                }
+    //                drawingContext.DrawText(formattedText, new Point(columnOffset + textOffset, rowOffset));
+    //                rowOffset += Data.RowsHeight;
+    //            }
 
-                columnOffset += Data.ColumnWidth;
-            }
-        }
-    }
+    //            columnOffset += Data.ColumnWidth;
+    //        }
+    //    }
+    //}
 }

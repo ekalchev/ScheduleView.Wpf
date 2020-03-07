@@ -17,13 +17,14 @@ namespace ScheduleView.Wpf.ViewModels
 
             int days = 5 * 7;
             int appointmentsPerDay = 3;
+            Random random = new Random();
             Instant now = SystemClock.Instance.GetCurrentInstant();
 
             for (int i = 0; i < days; i++)
             {
                 Instant appointmentStart = now;
 
-                for (int j = 0; j < appointmentsPerDay; j++)
+                for (int j = 0; j < random.Next() % 10; j++)
                 {
                     var appointmentEnd = appointmentStart.Plus(Duration.FromMinutes(15));
                     appointments.Add(new Appointment(i, new Interval(appointmentStart, appointmentEnd), false, Guid.NewGuid().ToString()));

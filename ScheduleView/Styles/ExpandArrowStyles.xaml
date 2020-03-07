@@ -2,15 +2,15 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:ScheduleView.Wpf.Controls">
 
-    <Style x:Key="MonthViewDayItemStyle" TargetType="{x:Type controls:MonthViewDayContainer}">
+    <Style x:Key="ExpandArrowDefaultStyle" TargetType="{x:Type controls:ExpandArrow}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    
+                    <Polygon Margin="4" Points="0,0 10,0, 5,5" Stroke="Black" Fill="Gray" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style  TargetType="{x:Type controls:MonthViewDayContainer}" BasedOn="{StaticResource MonthViewDayItemStyle}" />
+    <Style  TargetType="{x:Type controls:ExpandArrow}" BasedOn="{StaticResource ExpandArrowDefaultStyle}" />
 </ResourceDictionary>
