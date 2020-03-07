@@ -9,6 +9,6 @@
         SnapsToDevicePixels="True"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <controls:ScheduleView></controls:ScheduleView>
+        <controls:ScheduleView AppointmentItems="{Binding Appointments}"></controls:ScheduleView>
     </Grid>
 </Window>

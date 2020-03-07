@@ -27,7 +27,7 @@ namespace ScheduleView.Wpf.Controls
             CellsCount = RowsCount * ColumnsCount;
         }
 
-        public void Update(Size availableSize, Instant firstVisibleDay, IEnumerable<Occurrence> appointmentItems)
+        public void Update(Size availableSize, Instant firstVisibleDay)
         {
             ColumnWidth = LayoutHelper.RoundLayoutValue(availableSize.Width / ColumnsCount);
 
@@ -49,7 +49,13 @@ namespace ScheduleView.Wpf.Controls
 
             double columnOffset = 0;
             Grid = new MonthViewDay[RowsCount][];
-            Instant currentDay = firstVisibleDay;
+
+            IClock systemClock = SystemClock.Instance;
+            Instant now = systemClock.GetCurrentInstant();
+            DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+            LocalDate today = now.InZone(tz).Date;
+
+            ZonedDateTime currentDay = tz.AtStartOfDay(today);
 
             for (int rowIndex = 0; rowIndex < RowsCount; rowIndex++)
             {
@@ -62,7 +68,7 @@ namespace ScheduleView.Wpf.Controls
                     var day = new MonthViewDay();
                     day.GridCell = new Rect(columnIndex * ColumnWidth, rowIndex * RowsHeight, ColumnWidth, RowsHeight);
                     var nextDay = currentDay.Plus(NodaTime.Duration.FromDays(1));
-                    day.Day = new Interval(currentDay, nextDay); // may be we should use 23:59:99999 as end interval?????
+                    day.Day = new Interval(currentDay.ToInstant(), nextDay.ToInstant()); // may be we should use 23:59:99999 as end interval?????
                     currentDay = nextDay;
                     Grid[rowIndex][columnIndex] = day;
                 }
@@ -83,6 +89,19 @@ namespace ScheduleView.Wpf.Controls
                     }
                 }
             }
+        }
+
+        public Rect? Intersect(Interval interval)
+        {
+            foreach(var day in GridDays)
+            {
+                if(day.Day.Contains(interval.Start) == true)
+                {
+                    return day.GridCell;
+                }
+            }
+
+            return null;
         }
 
         public Rect Bounds { get; private set; }
