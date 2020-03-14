@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace ScheduleView.Wpf.Controls
 {
-    internal class MonthViewDay
+    internal struct MonthViewDay
     {
         public Interval Day { get; set; }
         public Rect GridCell { get; set; } 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodaTime;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,24 +17,27 @@ namespace ScheduleView.Wpf.Controls
         private Size extendSize = new Size();
         private double scrollLine;
         private const int rowsCount = 7;
-        private bool scrollAnimationInProgress = false;
+        private ScrollDirection scrollDirectionAnimation = ScrollDirection.None;
+
         private double scrollOffset;
 
         public AnimatedScrollPanel()
         {
-
+            ResetTranslateTransform();
+            VisualClip = null;
+            
         }
 
         protected override Size MeasureOverride(Size availableSize)
         {
+            var a = VisualScrollableAreaClip;
             scrollOffset = scrollLine = LayoutHelper.RoundLayoutValue(availableSize.Height / (rowsCount - 2));
-            extendSize = new Size(availableSize.Width, availableSize.Height + (scrollLine * 2));
+            extendSize = availableSize;
 
             ///ScheduleView.MonthsViewData.Update(availableSize);
-
             foreach (var child in Children.OfType<UIElement>())
             {
-                child.Measure(extendSize);
+                child.Measure(availableSize);
             }
 
             if (ScrollOwner != null)
@@ -41,38 +45,26 @@ namespace ScheduleView.Wpf.Controls
                 ScrollOwner.InvalidateScrollInfo();
             }
 
-            return extendSize;
+            return availableSize;
         }
 
         protected override Size ArrangeOverride(Size finalSize)
         {
             foreach (var element in Children.OfType<UIElement>())
             {
-                ResetTranslateTransform(element);
-
                 element.Arrange(new Rect(0, 0, finalSize.Width, finalSize.Height));
             }
 
             return finalSize;
         }
 
-        private void Animation_Completed(object sender, EventArgs e)
+        private void ResetTranslateTransform()
         {
-            scrollAnimationInProgress = false;
+            TranslateTransform trans = this.RenderTransform as TranslateTransform;
 
-            foreach (var child in Children.OfType<UIElement>())
-            {
-                ResetTranslateTransform(child);
-            }
-        }
-
-        private void ResetTranslateTransform(UIElement element)
-        {
-            TranslateTransform trans = element.RenderTransform as TranslateTransform;
-
-            element.RenderTransformOrigin = new Point(0, 0);
-            trans = new TranslateTransform(0, -scrollLine);
-            element.RenderTransform = trans;
+            this.RenderTransformOrigin = new Point(0, 0);
+            trans = new TranslateTransform(0, 0);
+            this.RenderTransform = trans;
         }
 
         private const double LineSize = 16;
@@ -91,7 +83,7 @@ namespace ScheduleView.Wpf.Controls
 
         public double HorizontalOffset { get; private set; }
 
-        public double VerticalOffset => ExtentHeight / 2;
+        public double VerticalOffset { get; private set; }
 
         public ScrollViewer ScrollOwner { get; set; }
         public ScheduleView ScheduleView { get; set; }
@@ -135,24 +127,75 @@ namespace ScheduleView.Wpf.Controls
 
         public void SetVerticalOffset(double offset)
         {
-            scrollOffset = DoubleUtil.GreaterThan(VerticalOffset, offset) == true ? 0 : scrollLine * 2;
+            ScrollDirection direction = DoubleUtil.GreaterThan(VerticalOffset, offset) ? ScrollDirection.Down : ScrollDirection.Up;
+            VerticalOffset = offset;
 
-            TranslateTransform trans = null;
+            ScheduleView.MonthViewStartDate = ScheduleView.MonthViewStartDate.Plus(NodaTime.Duration.FromDays(7));
 
-            if (scrollAnimationInProgress == false)
+            var scrollAnimation = new DoubleAnimation(0, scrollOffset * (int)direction, new System.Windows.Duration(TimeSpan.FromMilliseconds(150)));
+            scrollAnimation.Completed += Animation_Completed;
+            
+            // if we are chaging the direction of scroll, remove all queued animations and stop current anim
+            if(scrollDirectionAnimation != direction)
             {
-                scrollAnimationInProgress = true;
+                animationQueue.Clear();
+                StopCurrentScrollAnimation();
+            }
+
+            animationQueue.Enqueue(scrollAnimation);
+
+            ExecuteNextAnimationInQueue();
+        }
+
+        private Queue<DoubleAnimation> animationQueue = new Queue<DoubleAnimation>();
+
+        private void ExecuteNextAnimationInQueue()
+        {
+            if (scrollDirectionAnimation == ScrollDirection.None && animationQueue.Count > 0)
+            {
+                var animation = animationQueue.Dequeue();
+                scrollDirectionAnimation = DoubleUtil.GreaterThan(animation.To.Value, 0) ? ScrollDirection.Down : ScrollDirection.Up;
 
                 foreach (var child in Children.OfType<UIElement>())
                 {
-                    trans = child.RenderTransform as TranslateTransform;
-
-                    var a = (child.RenderTransform as TranslateTransform).Y;
-                    var scrollAnimation = new DoubleAnimation(-scrollOffset, new Duration(TimeSpan.FromMilliseconds(250)));
-                    scrollAnimation.Completed += Animation_Completed;
-
-                    trans.BeginAnimation(TranslateTransform.YProperty, scrollAnimation, HandoffBehavior.Compose);
+                    (child as IAnimationScrollObservable)?.NotifyScrollAnimationStarted(animation.To.Value, scrollDirectionAnimation);
                 }
+
+                StartScrollAnimation(animation);
+            }
+        }
+
+        /// <summary>
+        /// Pass null to stop the animation. Stopping animation only works with HandoffBehavior.SnapshotAndReplace
+        /// </summary>
+        /// <param name="animation"></param>
+        private void StartScrollAnimation(AnimationTimeline animation)
+        {
+            TranslateTransform trans = this.RenderTransform as TranslateTransform;
+            trans.BeginAnimation(TranslateTransform.YProperty, animation, HandoffBehavior.SnapshotAndReplace);
+        }
+
+        private void StopCurrentScrollAnimation()
+        {
+            StartScrollAnimation(null);
+        }
+
+        private void Animation_Completed(object sender, EventArgs e)
+        {
+            scrollDirectionAnimation = ScrollDirection.None;
+
+            if (animationQueue.Count > 0)
+            {
+                ExecuteNextAnimationInQueue();
+            }
+            else
+            {
+                foreach (var child in Children.OfType<UIElement>())
+                {
+                    (child as IAnimationScrollObservable)?.NotifyScrollAnimationCompleted();
+                }
+
+                this.ResetTranslateTransform();
             }
         }
 

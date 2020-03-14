@@ -43,24 +43,38 @@ namespace ScheduleView.Wpf.Controls
 
             scheduleView.occurrencies = occurrencies;
 
-            scheduleView.InvalidateMeasure();
-            scheduleView.UpdateLayout();
+            // TODO: this is not working
+            var parentUIElement = scheduleView.Parent as UIElement;
+            parentUIElement?.InvalidateMeasure();
+            parentUIElement?.UpdateLayout();
         }
 
         public ScheduleView()
         {
+            IClock systemClock = SystemClock.Instance;
+            Instant now = systemClock.GetCurrentInstant();
+            DateTimeZone tz = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+            LocalDate today = now.InZone(tz).Date;
+
+            MonthViewStartDate = tz.AtStartOfDay(today).ToInstant();
         }
 
         private MonthsViewAppointmentsPanel monthsViewPanel;
         private MonthViewPanel monthsViewGrid;
+        internal Size GridCellSize { get; set; }
+        internal Instant MonthViewStartDate { get; set; }
 
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
+
             monthsViewPanel = this.GetTemplateChild("PART_MonthsViewAppointmentsPanel") as MonthsViewAppointmentsPanel;
 
             monthsViewGrid = this.GetTemplateChild("PART_MonthsViewGrid") as MonthViewPanel;
             monthsViewGrid.ScheduleView = this;
+
+            var scrollPanel = this.GetTemplateChild("PART_ScrollPanel") as IScheduleViewAware;
+            scrollPanel.ScheduleView = this;
         }
 
         protected override Size MeasureOverride(Size constraint)

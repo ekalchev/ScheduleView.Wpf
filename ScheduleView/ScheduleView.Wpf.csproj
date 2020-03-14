@@ -80,6 +80,8 @@
     <Compile Include="Controls\ControlCache.cs" />
     <Compile Include="Controls\DrawingContextExtensions.cs" />
     <Compile Include="Controls\ExpandArrow.cs" />
+    <Compile Include="Controls\IAnimationScrollObservable.cs" />
+    <Compile Include="Controls\MonthViewGridCell.cs" />
     <Compile Include="Controls\MonthViewPanel.Selection.cs" />
     <Compile Include="Data\Appointment.cs" />
     <Compile Include="Controls\IScheduleViewAware.cs" />
@@ -88,8 +90,6 @@
     <Compile Include="Controls\MonthViewData.cs" />
     <Compile Include="Controls\MonthViewDay.cs" />
     <Compile Include="Controls\MonthViewDayContainer.cs" />
-    <Compile Include="Controls\MonthViewGridPanel.IScrollInfo.cs" />
-    <Compile Include="Controls\MonthViewGridPanel.cs" />
     <Compile Include="Controls\MonthViewPanel.cs" />
     <Compile Include="Controls\ScheduleView.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />

@@ -6,12 +6,12 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Grid Background="LightBlue">
-                        <!--<ScrollViewer CanContentScroll="True">-->
+                    <ScrollViewer CanContentScroll="True">
+                        <controls:AnimatedScrollPanel x:Name="PART_ScrollPanel">
                             <controls:MonthViewPanel x:Name="PART_MonthsViewGrid" />
-                        <!--</ScrollViewer>-->
-                        <controls:MonthsViewAppointmentsPanel x:Name="PART_MonthsViewAppointmentsPanel" />
-                    </Grid>
+                            <controls:MonthsViewAppointmentsPanel x:Name="PART_MonthsViewAppointmentsPanel" />
+                        </controls:AnimatedScrollPanel>
+                    </ScrollViewer>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
