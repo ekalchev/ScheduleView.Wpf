@@ -130,8 +130,6 @@ namespace ScheduleView.Wpf.Controls
             ScrollDirection direction = DoubleUtil.GreaterThan(VerticalOffset, offset) ? ScrollDirection.Down : ScrollDirection.Up;
             VerticalOffset = offset;
 
-            ScheduleView.MonthViewStartDate = ScheduleView.MonthViewStartDate.Plus(NodaTime.Duration.FromDays(7));
-
             var scrollAnimation = new DoubleAnimation(0, scrollOffset * (int)direction, new System.Windows.Duration(TimeSpan.FromMilliseconds(150)));
             scrollAnimation.Completed += Animation_Completed;
             
@@ -139,7 +137,7 @@ namespace ScheduleView.Wpf.Controls
             if(scrollDirectionAnimation != direction)
             {
                 animationQueue.Clear();
-                StopCurrentScrollAnimation();
+                //StopCurrentScrollAnimation(); // this doesn't look good when changing direction rapidly
             }
 
             animationQueue.Enqueue(scrollAnimation);
@@ -182,7 +180,10 @@ namespace ScheduleView.Wpf.Controls
 
         private void Animation_Completed(object sender, EventArgs e)
         {
+            ScheduleView.MonthViewStartDate = ScheduleView.MonthViewStartDate.Plus(NodaTime.Duration.FromDays(7 * -(int)scrollDirectionAnimation));
+
             scrollDirectionAnimation = ScrollDirection.None;
+            
 
             if (animationQueue.Count > 0)
             {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScheduleView.Wpf.Controls.MonthView;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace ScheduleView.Wpf.Controls
         private struct Cell
         {
             public MonthViewDay Day { get; set; }
-            public MonthViewDayContainer Container { get; set; }
+            public MonthViewBorder Container { get; set; }
         }
     }
 }

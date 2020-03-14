@@ -81,15 +81,18 @@
     <Compile Include="Controls\DrawingContextExtensions.cs" />
     <Compile Include="Controls\ExpandArrow.cs" />
     <Compile Include="Controls\IAnimationScrollObservable.cs" />
+    <Compile Include="Controls\MonthViewContainerCache.cs" />
     <Compile Include="Controls\MonthViewGridCell.cs" />
     <Compile Include="Controls\MonthViewPanel.Selection.cs" />
+    <Compile Include="Controls\MonthView\DayToStringConverter.cs" />
+    <Compile Include="Controls\MonthView\MonthViewBorder.cs" />
     <Compile Include="Data\Appointment.cs" />
     <Compile Include="Controls\IScheduleViewAware.cs" />
     <Compile Include="Controls\LayoutHelper.cs" />
     <Compile Include="Controls\MonthsViewAppointmentsPanel.cs" />
     <Compile Include="Controls\MonthViewData.cs" />
     <Compile Include="Controls\MonthViewDay.cs" />
-    <Compile Include="Controls\MonthViewDayContainer.cs" />
+    <Compile Include="Controls\MonthView\MonthViewDayContainer.cs" />
     <Compile Include="Controls\MonthViewPanel.cs" />
     <Compile Include="Controls\ScheduleView.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
@@ -108,7 +111,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Styles\MonthViewDayContainerStyle.xaml">
+    <Page Include="Styles\MonthViewDayContainerStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -147,6 +150,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="OptimizatiosTODO.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

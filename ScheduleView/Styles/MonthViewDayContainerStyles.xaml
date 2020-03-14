@@ -1,0 +1,26 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:ScheduleView.Wpf.Controls.MonthView">
+    <controls:DayToStringConverter x:Key="DayToStringConverter" />
+    
+    <Style x:Key="MonthViewDayItemDefaultStyle" TargetType="{x:Type controls:MonthViewDayContainer}">
+        <Setter Property="Background" Value="White" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:MonthViewDayContainer}">
+                    <Grid>
+                        <controls:MonthViewBorder Background="{TemplateBinding Background}" />
+                        <TextBlock Text="{TemplateBinding Day, Converter={StaticResource DayToStringConverter}}" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="Blue"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type controls:MonthViewDayContainer}" BasedOn="{StaticResource MonthViewDayItemDefaultStyle}" />
+</ResourceDictionary>

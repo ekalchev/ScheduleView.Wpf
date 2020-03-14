@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScheduleView.Wpf.Controls.MonthView;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -52,7 +53,10 @@ namespace ScheduleView.Wpf.Controls
         {
             foreach (var day in monthViewDayItems)
             {
-                day.IsSelected = false;
+                if (day != null)
+                {
+                    day.IsSelected = false;
+                }
             }
         }
 
@@ -62,16 +66,19 @@ namespace ScheduleView.Wpf.Controls
 
             foreach (var day in monthViewDayItems)
             {
-                if (selectionAnchor == container)
+                if (day != null)
                 {
-                    container.IsSelected = true;
-                }
-                else if (day == container || day == selectionAnchor)
-                {
-                    selectionStarted = !selectionStarted;
-                }
+                    if (selectionAnchor == container)
+                    {
+                        container.IsSelected = true;
+                    }
+                    else if (day == container || day == selectionAnchor)
+                    {
+                        selectionStarted = !selectionStarted;
+                    }
 
-                day.IsSelected = selectionStarted;
+                    day.IsSelected = selectionStarted;
+                }
             }
 
             selectionAnchor.IsSelected = true;

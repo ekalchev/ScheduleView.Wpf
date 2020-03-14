@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="850" Width="1200">
     <Grid>
         <controls:ScheduleView AppointmentItems="{Binding Appointments}"></controls:ScheduleView>
     </Grid>

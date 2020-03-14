@@ -1,0 +1,1 @@
+﻿* MonthViewDayItemDefaultStyle - remove TextBlock and implement it with something that is faster

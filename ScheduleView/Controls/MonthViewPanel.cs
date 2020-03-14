@@ -1,6 +1,8 @@
 ﻿using NodaTime;
+using ScheduleView.Wpf.Controls.MonthView;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,27 +16,25 @@ namespace ScheduleView.Wpf.Controls
     internal partial class MonthViewPanel : Panel, IAnimationScrollObservable
     {
         private MonthViewDayContainer[] monthViewDayItems = null;
+        private MonthViewContainerCache containerCache;
+
         private Size lastMeasureSize;
         private const int ColumnsCount = 7;
         private const int RowsCount = 5;
         public MonthViewDay[][] ActiveCells { get; private set; }
         private ScrollDirection scrollDirection;
-        private List<Cell> ArrangeData;
+        private int arrangeCounter;
 
         public MonthViewPanel()
         {
             MouseMove += MonthViewPanel_MouseMove;
             MouseLeftButtonDown += MonthViewPanel_MouseLeftButtonDown;
             MouseLeftButtonUp += MonthViewPanel_MouseLeftButtonUp;
+        }
 
-            ActiveCells = new MonthViewDay[RowsCount][];
-
-            for (int rowIndex = 0; rowIndex < ActiveCells.Length; rowIndex++)
-            {
-                ActiveCells[rowIndex] = new MonthViewDay[ColumnsCount];
-            }
-
-            ArrangeData = new List<Cell>((RowsCount * ColumnsCount) + 1);
+        private void ContainerCache_NewContainerCreated(object sender, MonthViewDayContainer e)
+        {
+            Children.Add(e);
         }
 
         internal ScheduleView ScheduleView { get; set; }
@@ -64,21 +64,17 @@ namespace ScheduleView.Wpf.Controls
             if (lastMeasureSize != availableSize)
             {
                 ScheduleView.GridCellSize = CalculateGridCell(availableSize);
+            }
 
-                lastMeasureSize = availableSize;
+            lastMeasureSize = availableSize;
 
-                if (monthViewDayItems == null)
-                {
-                    var monthViewDayItemCount = MonthViewData.ColumnsCount * MonthViewData.RowsCount + ColumnsCount; // + one extra row of containers
-                    monthViewDayItems = new MonthViewDayContainer[monthViewDayItemCount];
-
-                    for (int cellIndex = 0; cellIndex < monthViewDayItems.Length; cellIndex++)
-                    {
-                        var currentItem = new MonthViewDayContainer();
-                        monthViewDayItems[cellIndex] = currentItem;
-                        Children.Add(currentItem);
-                    }
-                }
+            if (containerCache == null)
+            {
+                var totalContainersNeeded = MonthViewData.ColumnsCount * MonthViewData.RowsCount + ColumnsCount; // we add one additional row that is used for animated scrolling
+                monthViewDayItems = new MonthViewDayContainer[totalContainersNeeded];
+                containerCache = new MonthViewContainerCache(totalContainersNeeded);
+                containerCache.NewContainerCreated += ContainerCache_NewContainerCreated;
+                containerCache.EnsureContainersCache();
             }
 
             return availableSize;
@@ -86,14 +82,17 @@ namespace ScheduleView.Wpf.Controls
 
         protected override Size ArrangeOverride(Size finalSize)
         {
+            Debug.WriteLine("Arrange " + arrangeCounter++);
+            containerCache.Reset();
+
             double columnOffset = 0;
             double columnWidth = ScheduleView.GridCellSize.Width;
             double rowHeight = ScheduleView.GridCellSize.Height;
 
-            Instant currentDay = ScheduleView.MonthViewStartDate;
             Rect arrangeRect;
             MonthViewDayContainer container;
             int containerIndex = 0;
+            Instant currentDay = ScheduleView.MonthViewStartDate;
 
             for (int rowIndex = 0; rowIndex < RowsCount; rowIndex++)
             {
@@ -102,7 +101,10 @@ namespace ScheduleView.Wpf.Controls
                 for (int columnIndex = 0; columnIndex < ColumnsCount; columnIndex++)
                 {
                     arrangeRect = new Rect(columnIndex * columnWidth, rowIndex * rowHeight, columnWidth, rowHeight);
-                    container = monthViewDayItems[containerIndex++];
+                    container = containerCache.GetContainer(currentDay.InUtc().Day);
+                    currentDay = currentDay.Plus(NodaTime.Duration.FromDays(1));
+
+                    monthViewDayItems[containerIndex++] = container;
                     container.Arrange(arrangeRect);
                 }
 
@@ -113,10 +115,21 @@ namespace ScheduleView.Wpf.Controls
             if (scrollDirection != ScrollDirection.None)
             {
                 int topCoef = scrollDirection == ScrollDirection.Up ? RowsCount : -1;
+
+                if (scrollDirection == ScrollDirection.Up)
+                {
+                    currentDay = ScheduleView.MonthViewStartDate.Plus(NodaTime.Duration.FromDays(RowsCount * ColumnsCount));
+                }
+                else if (scrollDirection == ScrollDirection.Down)
+                {
+                    currentDay = ScheduleView.MonthViewStartDate.Minus(NodaTime.Duration.FromDays(ColumnsCount));
+                }
+
                 for (int columnIndex = 0; columnIndex < ColumnsCount; columnIndex++)
                 {
                     arrangeRect = new Rect(columnIndex * columnWidth, topCoef * rowHeight, columnWidth, rowHeight);
-                    container = monthViewDayItems[containerIndex++];
+                    container = containerCache.GetContainer(currentDay.InUtc().Day);
+                    currentDay = currentDay.Plus(NodaTime.Duration.FromDays(1));
                     container.Arrange(new Rect(arrangeRect.Left, arrangeRect.Top, arrangeRect.Width, arrangeRect.Height));
                 }
             }

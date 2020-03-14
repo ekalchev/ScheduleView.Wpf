@@ -7,7 +7,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/ExpandArrowStyles.xaml" />
-                <ResourceDictionary Source="Styles/MonthViewDayContainerStyle.xaml" />
+                <ResourceDictionary Source="Styles/MonthViewDayContainerStyles.xaml" />
                 <ResourceDictionary Source="Styles/ScheduleViewStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
