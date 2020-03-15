@@ -1,6 +1,7 @@
 ﻿using NodaTime;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,9 @@ namespace ScheduleView.Wpf.Controls
         private Size extendSize = new Size();
         private double scrollLine;
         private const int rowsCount = 7;
-        private ScrollDirection scrollDirectionAnimation = ScrollDirection.None;
+        private ScrollAnimation currentAnimation;
+        private static readonly double extendHeight = 100;
+        private static readonly double viewportHeight = 10;
 
         private double scrollOffset;
 
@@ -73,17 +76,17 @@ namespace ScheduleView.Wpf.Controls
         public bool CanVerticallyScroll { get; set; } = true;
         public bool CanHorizontallyScroll { get; set; }
 
-        public double ExtentWidth => extendSize.Width;
+        public double ExtentWidth => 0;
 
-        public double ExtentHeight => extendSize.Height;
+        public double ExtentHeight => extendHeight;
 
-        public double ViewportWidth => 100;
+        public double ViewportWidth => 0;
 
-        public double ViewportHeight => 100;
+        public double ViewportHeight => viewportHeight;
 
         public double HorizontalOffset { get; private set; }
 
-        public double VerticalOffset { get; private set; }
+        public double VerticalOffset { get; private set; } = (extendHeight - viewportHeight) / 2;
 
         public ScrollViewer ScrollOwner { get; set; }
         public ScheduleView ScheduleView { get; set; }
@@ -128,38 +131,55 @@ namespace ScheduleView.Wpf.Controls
         public void SetVerticalOffset(double offset)
         {
             ScrollDirection direction = DoubleUtil.GreaterThan(VerticalOffset, offset) ? ScrollDirection.Down : ScrollDirection.Up;
-            VerticalOffset = offset;
 
-            var scrollAnimation = new DoubleAnimation(0, scrollOffset * (int)direction, new System.Windows.Duration(TimeSpan.FromMilliseconds(150)));
-            scrollAnimation.Completed += Animation_Completed;
-            
             // if we are chaging the direction of scroll, remove all queued animations and stop current anim
-            if(scrollDirectionAnimation != direction)
+            if (scrollStepQueue.Count > 0 && scrollStepQueue.Peek().Direction != direction)
             {
-                animationQueue.Clear();
-                //StopCurrentScrollAnimation(); // this doesn't look good when changing direction rapidly
+                scrollStepQueue.Clear();
+                //StopCurrentScrollAnimation(); // this doesn't look good
             }
 
-            animationQueue.Enqueue(scrollAnimation);
+            var duration = new System.Windows.Duration(TimeSpan.FromMilliseconds((double)500 / Math.Max(1, Math.Min(scrollStepQueue.Count, 3))));
+
+            UpdatePendingAnimationDurations(duration);
+            Debug.WriteLine($"{scrollStepQueue.Count}, {duration.TimeSpan}");
+            scrollStepQueue.Enqueue(new ScrollStep()
+            {
+                Offset = scrollLine * (int)direction,
+                Direction = direction,
+                Duration = duration
+            });
 
             ExecuteNextAnimationInQueue();
         }
 
-        private Queue<DoubleAnimation> animationQueue = new Queue<DoubleAnimation>();
+        private Queue<ScrollStep> scrollStepQueue = new Queue<ScrollStep>();
+
+        private void UpdatePendingAnimationDurations(System.Windows.Duration duration)
+        {
+            foreach(var item in scrollStepQueue)
+            {
+                item.Duration = duration;
+            }
+        }
 
         private void ExecuteNextAnimationInQueue()
         {
-            if (scrollDirectionAnimation == ScrollDirection.None && animationQueue.Count > 0)
+            if (currentAnimation == null && scrollStepQueue.Count > 0)
             {
-                var animation = animationQueue.Dequeue();
-                scrollDirectionAnimation = DoubleUtil.GreaterThan(animation.To.Value, 0) ? ScrollDirection.Down : ScrollDirection.Up;
+                var scrollStep = scrollStepQueue.Peek();
+
+                var scrollAnimation = new DoubleAnimation(0, scrollStep.Offset, scrollStep.Duration);
+                scrollAnimation.EasingFunction = new QuarticEase();
+                scrollAnimation.Completed += (s, e) => AnimationCompletedHandler(scrollStep.Direction);
 
                 foreach (var child in Children.OfType<UIElement>())
                 {
-                    (child as IAnimationScrollObservable)?.NotifyScrollAnimationStarted(animation.To.Value, scrollDirectionAnimation);
+                    (child as IAnimationScrollObservable)?.NotifyScrollAnimationStarted(scrollStep.Offset, scrollStep.Direction);
                 }
 
-                StartScrollAnimation(animation);
+                currentAnimation = new ScrollAnimation(scrollAnimation, scrollStep);
+                StartScrollAnimation(scrollAnimation);
             }
         }
 
@@ -178,14 +198,20 @@ namespace ScheduleView.Wpf.Controls
             StartScrollAnimation(null);
         }
 
-        private void Animation_Completed(object sender, EventArgs e)
+        private void AnimationCompletedHandler(ScrollDirection direction)
         {
-            ScheduleView.MonthViewStartDate = ScheduleView.MonthViewStartDate.Plus(NodaTime.Duration.FromDays(7 * -(int)scrollDirectionAnimation));
+            currentAnimation = null;
 
-            scrollDirectionAnimation = ScrollDirection.None;
-            
+            // pop out completed animation
+            if (scrollStepQueue.Count > 0)
+            {
+                scrollStepQueue.Dequeue();
+            }
 
-            if (animationQueue.Count > 0)
+            ScheduleView.MonthViewStartDate = ScheduleView.MonthViewStartDate.Plus(NodaTime.Duration.FromDays(7 * -(int)direction));
+            this.ResetTranslateTransform();
+
+            if (scrollStepQueue.Count > 0)
             {
                 ExecuteNextAnimationInQueue();
             }
@@ -195,9 +221,7 @@ namespace ScheduleView.Wpf.Controls
                 {
                     (child as IAnimationScrollObservable)?.NotifyScrollAnimationCompleted();
                 }
-
-                this.ResetTranslateTransform();
-            }
+            }            
         }
 
         public void LineLeft()
@@ -206,6 +230,25 @@ namespace ScheduleView.Wpf.Controls
 
         public void LineRight()
         {
+        }
+
+        private class ScrollStep
+        {
+            public ScrollDirection Direction { get; set; }
+            public double Offset { get; set; }
+            public System.Windows.Duration Duration { get; set; }
+        }
+
+        private class ScrollAnimation
+        {
+            public ScrollAnimation(DoubleAnimation animation, ScrollStep scrollStep)
+            {
+                Animation = animation;
+                ScrollStep = scrollStep;
+            }
+
+            public DoubleAnimation Animation { get; }
+            public ScrollStep ScrollStep { get; }
         }
     }
 }
